@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Process wasap
+Process labeled data
 """
 import logging
 import os
@@ -18,14 +18,14 @@ def _main():
 
         # Log conf
         log_file = os.path.join(cfg["LOGS"]["Path"],
-                                datetime.now().strftime('proc_%Y_%m_%d_%H_%M_%S.log'))
+                                datetime.now().strftime('proclabel_%Y_%m_%d_%H_%M_%S.log'))
 
         logger.set_file_logs(level=logging.INFO, filename=log_file)
-        data_path = cfg["INPUTS"]["data"]
+        data_labeled_path = cfg["INPUTS"]["data_labeled"]
 
-        logger.info("Process wasap...")
-        text_proc.to_csv(data_path)
-        logger.info("Process wasap done")
+        logger.info("Process labeled data...")
+        text_proc.n3_to_csv(data_labeled_path)
+        logger.info("Process labeled data done")
 
     except Exception:  # pylint: disable=broad-except
         logger.exception("Process failed")
