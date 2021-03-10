@@ -2,9 +2,9 @@
 TODO
 """
 import logging
+import tqdm
 
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
-
 
 class DsLogger(logging.Logger):
     """
@@ -65,7 +65,7 @@ class DsLogger(logging.Logger):
         self.unset_file_logs()
 
         # New handler
-        self._f_hand = logging.FileHandler(filename, mode=mode)
+        self._f_hand = logging.FileHandler(filename, mode=mode, encoding='utf-8')
         self._f_hand.setLevel(level)
         self._f_hand.setFormatter(logging.Formatter(DsLogger._f_style))
 
@@ -148,3 +148,15 @@ class DsLogger(logging.Logger):
         """
         for hanlder in [x for x in (self._f_hand, self._rf_hand, self._tf_hand) if x]:
             hanlder.close()
+
+    def emit(self, record):
+        """
+        Do whatever it takes to actually log the specified logging record.
+
+        This version is intended to be implemented by subclasses and so
+        raises a NotImplementedError.
+        """
+        try:
+            tqdm.tqdm.write(record)
+        except (KeyboardInterrupt, SystemExit):
+            raise

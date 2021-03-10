@@ -9,9 +9,9 @@ from ds.core.utils.logger import DsLogger
 # Logger
 logging.setLoggerClass(DsLogger)
 
-logger = logging.getLogger("talkbot")
+logger = logging.getLogger("myberts")
 logger.setLevel(logging.DEBUG)
 
 logger.propagate = False
 
-CONF_INI = "ds/sol/talkbot/scripts/local.ini"
+CONF_INI = "ds/sol/myberts/scripts/local.ini"
