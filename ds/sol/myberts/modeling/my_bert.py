@@ -17,11 +17,12 @@ from sklearn.metrics import classification_report, accuracy_score, f1_score, con
 from sklearn.metrics import precision_score, recall_score
 
 from ds.sol.myberts import logger, CONF_INI
-from ds.sol.myberts.utils import corpus as cp
 
 CFG = ConfigParser()
 CFG.read(CONF_INI)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Setting
 
 TEST_SIZE = 0.2
 
@@ -42,6 +43,10 @@ def fit(data, x_label, y_label, bert_model, tokenizer_vocab, label_dict):
     y_data = data[y_label]
     x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=TEST_SIZE,
                                                         random_state=107, stratify=y_data)
+    logger.info("Distribution Train Labels: ")
+    logger.info(str(np.unique(y_train, return_counts=True)))
+    logger.info("Distribution Test Labels: ")
+    logger.info(str(np.unique(y_test, return_counts=True)))
     data_train = pd.concat([x_train, y_train], axis=1)
     data_test = pd.concat([x_test, y_test], axis=1)
     logger.info("Create dataloader for training...")
@@ -59,9 +64,9 @@ def fit(data, x_label, y_label, bert_model, tokenizer_vocab, label_dict):
                                                           num_labels=num_labels,
                                                           output_attentions=False,
                                                           output_hidden_states=False)
-    logger.info("Training")
+    logger.info("Training...")
     epochs = int(CFG["MODELS"]["epochs"])
-    fine_tune(epochs, model, data_load_train, data_load_test)
+    fine_tune(epochs, model, data_load_train, data_load_test, label_dict)
 
 # Data Loader
 
@@ -147,7 +152,7 @@ def performance_acc_class(preds, labels, labels_dict):
 
 # Fine-tune BERT model
 
-def fine_tune(epochs, model, data_loader_train, data_loader_val):
+def fine_tune(epochs, model, data_loader_train, data_loader_val, label_dict):
     """
     Fine-tune of BERT model using run_glue
     approach from HuggingFace
@@ -159,7 +164,8 @@ def fine_tune(epochs, model, data_loader_train, data_loader_val):
     torch.cuda.manual_seed_all(seed_val)           # For GPU
     model.to(DEVICE)
     logger.info("Device: " + str(DEVICE))
-    label_values = list(cp.DICT_LABEL.values())
+    label_values = list(label_dict.values())
+    target_names=list(map(str,label_values))
     for epoch in tqdm(range(1, epochs+1)):
         model.train()
         loss_train_total = 0
@@ -202,13 +208,17 @@ def fine_tune(epochs, model, data_loader_train, data_loader_val):
         precision_s = precision_score(true_values, predictions, average=None)
         recall_s = recall_score(true_values, predictions, average=None)
         conf_matrix = confusion_matrix(true_values, predictions, labels=label_values)
+        report = classification_report(predictions, true_values, labels=label_values,
+                                       target_names=target_names)
         tqdm.write(f"Validation loss: {val_loss}")
         tqdm.write(f"F1 Score (weighted): {val_f1}")
+        logger.info("Classification Report:")
+        logger.info(report)
         logger.info(f"F1 Score (weighted): {val_f1}")
         logger.info(f"Precision: {precision_s}")
         logger.info(f"Recall: {recall_s}")
         logger.info(f"Accuracy: {accuracy_s}")
-        logger.info("Dict label: " + str(cp.DICT_LABEL))
+        logger.info("Dict label: " + str(label_dict))
         logger.info("Confusion Matrix: %s", str(conf_matrix))
 
 # Evaluate
@@ -285,7 +295,7 @@ def predict(bert_model, my_bert_model,
     :param string tokenizer_vocab: path of the tokernizer vocabulary
     :param iterable sentences: list of sentences
     :param dict label_dict: label dictionary
-    :return: void
+    :return: list of predictions
     """
     label_list = list(label_dict)
     model = BertForSequenceClassification.from_pretrained(bert_model,
@@ -301,7 +311,4 @@ def predict(bert_model, my_bert_model,
     predictions = evaluate_predict(data_loader, model)
     logits = np.argmax(predictions, axis=1).flatten()
     labels_pred = [label_list[logit] for logit in logits]
-    out_data = pd.DataFrame([sentences, labels_pred]).T
-    out_data.columns = [cp.SENT_ATTR, cp.LABL_ATTR]
-    out_data.to_csv(CFG["OUTPUTS"]["pred"], sep=";", index=False)
-
+    return labels_pred

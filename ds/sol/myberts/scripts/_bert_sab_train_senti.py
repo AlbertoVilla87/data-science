@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-BERT fit
+BERT fit using SAB dataset
 """
 import logging
 import os
@@ -10,10 +10,10 @@ from datetime import datetime
 
 import pandas as pd
 
+from ds.core.cleaners import sab
 from ds.sol.myberts import logger, CONF_INI
+from ds.sol.myberts.processing import process
 from ds.sol.myberts.modeling import my_bert
-from ds.sol.myberts.processing import text_proc
-from ds.sol.myberts.utils import corpus as cp
 
 def _main():
     try:
@@ -27,13 +27,14 @@ def _main():
         logger.set_file_logs(level=logging.INFO, filename=log_file)
         bert_model = cfg["MODELS"]["bert_model"]
         bert_tokenizer = cfg["MODELS"]["bert_tokenizer"]
-        data_labeled_path = cfg["INPUTS"]["data_labeled"]
-        encoding = cfg["ENCODING"]["spa"]
+        data_labeled_path = cfg["INPUTS"]["data_train"]
         logger.info("Process labeled data...")
-        data = text_proc.proc_data_label(data_labeled_path, encoding, cp.DICT_LABEL)
+        data = sab.process(data_labeled_path)
+        logger.info("Balance data...")
+        data = process.balance_data(data, sab.POLR_ATTR)
         logger.info("Train BERT..")
-        my_bert.fit(data, cp.CONT_ATTR, cp.LABL_ATTR,
-                    bert_model, bert_tokenizer, cp.DICT_LABEL)
+        my_bert.fit(data, sab.CONT_ATTR, sab.LABL_ATTR,
+                    bert_model, bert_tokenizer, sab.DICT_LABEL)
         logger.info("Analyze sentiment done")
 
     except Exception:  # pylint: disable=broad-except

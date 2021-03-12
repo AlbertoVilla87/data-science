@@ -8,8 +8,7 @@ import os
 from configparser import ConfigParser
 from datetime import datetime
 
-from ds.sol.talkbot import logger, CONF_INI
-from ds.sol.talkbot.processing import text_proc
+from ds.core.cleaners import logger, CONF_INI, whatsapp
 
 def _main():
     try:
@@ -18,13 +17,13 @@ def _main():
 
         # Log conf
         log_file = os.path.join(cfg["LOGS"]["Path"],
-                                datetime.now().strftime('proc_%Y_%m_%d_%H_%M_%S.log'))
+                                datetime.now().strftime('wasap_%Y_%m_%d_%H_%M_%S.log'))
 
         logger.set_file_logs(level=logging.INFO, filename=log_file)
-        data_path = cfg["INPUTS"]["data"]
+        data_path = cfg["INPUTS"]["whatsapp"]
 
         logger.info("Process wasap...")
-        text_proc.to_csv(data_path)
+        whatsapp.to_csv(data_path)
         logger.info("Process wasap done")
 
     except Exception:  # pylint: disable=broad-except

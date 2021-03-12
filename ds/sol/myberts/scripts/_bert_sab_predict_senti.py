@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-BERT predict
+BERT predict using SAB dataset
 """
 import logging
 import os
@@ -12,8 +12,11 @@ import pandas as pd
 
 from ds.sol.myberts import logger, CONF_INI
 from ds.sol.myberts.modeling import my_bert
-from ds.sol.myberts.processing import text_proc
-from ds.sol.myberts.utils import corpus as cp
+from ds.core.cleaners import sab, whatsapp, tweeter
+
+# Settings
+TEXT_FIELD = "text"
+LABEL_FIELD = "label"
 
 def _main():
     try:
@@ -28,13 +31,17 @@ def _main():
         bert_model = cfg["MODELS"]["bert_model"]
         bert_tokenizer = cfg["MODELS"]["bert_tokenizer"]
         senti_bert = cfg["OUT_MODELS"]["model_selected"]
-        data_path = cfg["OUTPUTS"]["proc"]
-        encoding = cfg["ENCODING"]["spa"]
+        data_path = cfg["INPUTS"]["data_predict"]
         logger.info("Process labeled data...")
-        data = pd.read_csv(data_path, sep=";", encoding=encoding)
+        data = pd.read_csv(data_path, sep=";", encoding="utf-8")
         sentences = data["text"].values
+        sentences = [tweeter.clean_text(sent) for sent in sentences]
         logger.info("BERT prediction..")
-        my_bert.predict(bert_model, senti_bert, bert_tokenizer, sentences, cp.DICT_LABEL)
+        labels_pred = my_bert.predict(bert_model, senti_bert, bert_tokenizer,
+                        sentences, sab.DICT_LABEL)
+        out_data = pd.DataFrame([sentences, labels_pred]).T
+        out_data.columns = [TEXT_FIELD, LABEL_FIELD]
+        out_data.to_csv(cfg["OUTPUTS"]["data_predicted"], sep=";", index=False, encoding="utf-8")
         logger.info("BERT prediction done")
 
     except Exception:  # pylint: disable=broad-except
