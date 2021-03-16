@@ -8,7 +8,7 @@ Create your own BERTS models for Topic Modelling, Sentiment and Emotional Analys
 
 Bert trained model is used to create the desired model from this one. We use the pretrained multilingual BERT model:
 
-https://github.com/google-research/bert/blob/master/multilingual.md
+https://huggingface.co/nlptown/bert-base-multilingual-uncased-sentiment/tree/main
 
 ## Configuration file
 
