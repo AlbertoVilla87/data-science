@@ -4,15 +4,55 @@ Create your own BERTS models for Topic Modelling, Sentiment and Emotional Analys
 
 ## Dependencies
 
+### Folders structure (example)
+
+```python
+C:
++---fine_tune_models
+|       BERT_ft_epoch1.model
+|       BERT_ft_epoch10.model
+|       BERT_ft_epoch2.model
+|       BERT_ft_epoch3.model
+|       BERT_ft_epoch4.model
+|       BERT_ft_epoch5.model
+|       BERT_ft_epoch6.model
+|       BERT_ft_epoch7.model
+|       BERT_ft_epoch8.model
+|       BERT_ft_epoch9.model
+|
++---output
+|       out_data.csv
+|
++---pre_trained_models
+|       config.json
+|       pytorch_model.bin
+|       vocab_tokenizer.txt
+|
++---processed
+|   +---sab
+|   |       data_label.csv
+|   |
+|   \---whatsapp
+|           chat_proc.csv
+|           chat_processed.csv
+|
+\---raw
+    +---sab
+    |       corpus.n3
+    |
+    \---whatsapp
+            Chat de WhatsApp with XXX.txt
+```
+
 ### Pretrained model
 
 Bert trained model is used to create the desired model from this one. We use the pretrained multilingual BERT model:
 
 https://huggingface.co/nlptown/bert-base-multilingual-uncased-sentiment/tree/main
 
-## Configuration file
+### Configuration file
 
-`local.ini` contains the parameters configuration and the paths of the pipeline
+`local.ini` contains the parameters configuration and the paths of the pipeline. Set the paths based on the working directory.
 
 ```python
 [LOGS]
