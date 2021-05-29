@@ -14,6 +14,7 @@ def _main():
     try:
         cfg = ConfigParser()
         cfg.read(CONF_INI)
+        print(cfg.items())
 
         # Log conf
         log_file = os.path.join(cfg["LOGS"]["Path"],

@@ -310,5 +310,6 @@ def predict(bert_model, my_bert_model,
                                      train_mode=False)
     predictions = evaluate_predict(data_loader, model)
     logits = np.argmax(predictions, axis=1).flatten()
+    probs = np.max(predictions, axis=1).flatten()
     labels_pred = [label_list[logit] for logit in logits]
-    return labels_pred
+    return labels_pred, probs

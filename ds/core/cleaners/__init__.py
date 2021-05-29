@@ -14,4 +14,4 @@ logger.setLevel(logging.DEBUG)
 
 logger.propagate = False
 
-CONF_INI = "ds/sol/cleaners/local.ini"
+CONF_INI = "ds/core/cleaners/scripts/local.ini"

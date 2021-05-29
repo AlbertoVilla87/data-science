@@ -22,6 +22,7 @@ def to_csv(file_path):
     """
     Idenfity the wasap components and save in a csv
     :param string file_path: path of the wasap conversation
+    :return: void
     """
     data = open(file_path, "r", encoding=ENCODING).readlines()
     data = [line.replace('\n', ' ').replace('\r', '') for line in data]

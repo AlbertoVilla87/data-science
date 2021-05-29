@@ -17,6 +17,7 @@ from ds.core.cleaners import sab, whatsapp, tweeter
 # Settings
 TEXT_FIELD = "text"
 LABEL_FIELD = "label"
+PROB_FIELD = "prob"
 
 def _main():
     try:
@@ -34,13 +35,14 @@ def _main():
         data_path = cfg["INPUTS"]["data_predict"]
         logger.info("Process labeled data...")
         data = pd.read_csv(data_path, sep=";", encoding="utf-8")
-        sentences = data["text"].values
+        sentences = data[TEXT_FIELD].values
         sentences = [tweeter.clean_text(sent) for sent in sentences]
         logger.info("BERT prediction..")
-        labels_pred = my_bert.predict(bert_model, senti_bert, bert_tokenizer,
+        labels_pred, probs = my_bert.predict(bert_model, senti_bert, bert_tokenizer,
                         sentences, sab.DICT_LABEL)
-        out_data = pd.DataFrame([sentences, labels_pred]).T
-        out_data.columns = [TEXT_FIELD, LABEL_FIELD]
+        out_data = pd.DataFrame([labels_pred, probs]).T
+        out_data.columns = [PROB_FIELD, LABEL_FIELD]
+        out_data = pd.concat([data, out_data], axis=1)
         out_data.to_csv(cfg["OUTPUTS"]["data_predicted"], sep=";", index=False, encoding="utf-8")
         logger.info("BERT prediction done")
 
